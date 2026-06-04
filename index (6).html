@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BPCL Outlet Locator – Belgaum Territory</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+:root {
+  --gold: #FCCB06;
+  --gold-dark: #D9A800;
+  --gold-pale: #FEF6D0;
+  --navy: #0D1B3E;
+  --navy-mid: #17285A;
+  --navy-soft: #2B4080;
+  --cream: #F7F7F4;
+  --surface: #FFFFFF;
+  --border: rgba(13,27,62,0.09);
+  --muted: #6B7280;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --so-0: #4F46E5; --so-0b: #EEF2FF;
+  --so-1: #0E7490; --so-1b: #ECFEFF;
+  --so-2: #D97706; --so-2b: #FFFBEB;
+  --so-3: #7C3AED; --so-3b: #F5F3FF;
+  --so-4: #059669; --so-4b: #ECFDF5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--navy); height: 100dvh; display: flex; flex-direction: column; }
+
+/* ── HEADER ── */
+header {
+  background: var(--navy);
+  position: sticky; top: 0; z-index: 1000;
+  box-shadow: 0 2px 16px rgba(13,27,62,0.3);
+}
+.header-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 16px; height: 56px;
+  display: flex; align-items: center; gap: 12px;
+}
+.logo-pill {
+  background: var(--gold); border-radius: 10px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.logo-pill svg { width: 20px; height: 20px; }
+.brand { line-height: 1.1; }
+.brand-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px; color: #fff; }
+.brand-sub { font-size: 11px; color: rgba(255,255,255,0.45); }
+.hdr-count {
+  margin-left: auto;
+  background: rgba(252,203,6,0.18); border: 1px solid rgba(252,203,6,0.35);
+  color: var(--gold); font-size: 12px; font-weight: 600;
+  padding: 3px 10px; border-radius: 20px;
+}
+.view-toggle {
+  display: flex; background: rgba(255,255,255,0.08); border-radius: 8px; overflow: hidden;
+}
+.view-btn {
+  border: none; background: none; color: rgba(255,255,255,0.5);
+  padding: 6px 12px; font-size: 12px; font-weight: 500; cursor: pointer;
+  display: flex; align-items: center; gap: 5px; transition: all 0.15s;
+}
+.view-btn.active { background: var(--gold); color: var(--navy); }
+.view-btn svg { width: 14px; height: 14px; }
+
+/* ── FILTERS ── */
+.filter-bar {
+  background: var(--navy-mid);
+  padding: 10px 16px;
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+}
+.search-wrap { position: relative; flex: 1; min-width: 180px; }
+.search-wrap input {
+  width: 100%; height: 38px;
+  padding: 0 12px 0 36px;
+  background: rgba(255,255,255,0.09); border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-sm); color: #fff;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
+  transition: border-color 0.2s;
+}
+.search-wrap input::placeholder { color: rgba(255,255,255,0.35); }
+.search-wrap input:focus { border-color: var(--gold); }
+.search-icon {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  color: rgba(255,255,255,0.4); pointer-events: none;
+}
+.flt {
+  height: 38px; padding: 0 28px 0 10px;
+  background: rgba(255,255,255,0.09)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")
+    no-repeat right 8px center;
+  border: 1.5px solid rgba(255,255,255,0.12); border-radius: var(--radius-sm);
+  color: rgba(255,255,255,0.8); font-family: 'DM Sans', sans-serif; font-size: 13px;
+  outline: none; appearance: none; cursor: pointer;
+}
+.flt:focus { border-color: var(--gold); }
+.flt option { background: var(--navy-mid); }
+.results-row {
+  max-width: 1200px; margin: 0 auto;
+  padding: 10px 16px 6px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.chip {
+  font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px;
+  background: var(--gold-pale); color: var(--navy);
+  border: 1px solid rgba(217,168,0,0.4);
+}
+.results-count { font-size: 12px; color: var(--muted); margin-left: auto; }
+
+/* ── MAIN LAYOUT ── */
+.app-body { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+
+/* LIST VIEW */
+#list-view { display: block; overflow-y: auto; }
+.grid {
+  max-width: 1200px; margin: 0 auto;
+  padding: 12px 16px 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 12px;
+}
+.card {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden;
+  transition: transform 0.16s, box-shadow 0.16s;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(13,27,62,0.10); }
+.card-head {
+  padding: 14px 14px 10px;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.avatar {
+  width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+  background: var(--gold-pale); border: 2px solid var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px; color: var(--navy);
+}
+.c-name { font-weight: 600; font-size: 13px; color: var(--navy); line-height: 1.3; }
+.c-loc { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.so-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; margin-top: 4px;
+}
+.divider { height: 1px; background: var(--border); margin: 0 14px; }
+.card-body { padding: 10px 14px 12px; display: flex; flex-direction: column; gap: 7px; }
+.info-row { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; color: var(--navy); }
+.info-row svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; color: var(--muted); }
+.info-row a { color: var(--navy-soft); font-weight: 500; text-decoration: none; }
+.info-row a:hover { text-decoration: underline; }
+.card-foot { padding: 0 14px 12px; display: flex; gap: 7px; }
+.btn {
+  flex: 1; height: 32px; border-radius: var(--radius-sm); border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  text-decoration: none; transition: opacity 0.14s, transform 0.14s;
+}
+.btn:active { transform: scale(0.97); }
+.btn-gold { background: var(--gold); color: var(--navy); }
+.btn-gold:hover { background: var(--gold-dark); }
+.btn-outline { background: transparent; color: var(--navy-soft); border: 1.5px solid var(--border); }
+.btn-outline:hover { background: var(--cream); }
+.btn svg { width: 12px; height: 12px; }
+
+/* EMPTY */
+.empty {
+  grid-column: 1/-1; text-align: center;
+  padding: 60px 20px; color: var(--muted);
+}
+.empty-ico {
+  width: 52px; height: 52px; background: var(--gold-pale); border-radius: 14px;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
+}
+.empty h3 { font-size: 15px; color: var(--navy); margin-bottom: 5px; }
+.empty p { font-size: 12px; }
+
+/* MAP VIEW */
+#map-view { display: none; flex: 1; min-height: 0; position: relative; height: 100%; }
+#map { position: absolute; inset: 0; }
+.map-sidebar {
+  position: absolute; top: 12px; left: 12px; z-index: 500;
+  width: 300px; max-height: calc(100% - 24px);
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(13,27,62,0.18);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.sidebar-head {
+  padding: 12px 14px; background: var(--navy);
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sidebar-head span { font-family: 'DM Sans', sans-serif; font-weight: 400; font-size: 11px; color: rgba(255,255,255,0.5); }
+.sidebar-list { overflow-y: auto; flex: 1; }
+.s-item {
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.12s;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.s-item:hover { background: var(--cream); }
+.s-item.active { background: var(--gold-pale); }
+.s-dot {
+  width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
+}
+.s-name { font-size: 12px; font-weight: 600; color: var(--navy); line-height: 1.3; }
+.s-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+/* SO color assignments */
+.so-0 { color: var(--so-0); background: var(--so-0b); border: 1px solid rgba(79,70,229,0.25); }
+.so-1 { color: var(--so-1); background: var(--so-1b); border: 1px solid rgba(14,116,144,0.25); }
+.so-2 { color: var(--so-2); background: var(--so-2b); border: 1px solid rgba(217,119,6,0.25); }
+.so-3 { color: var(--so-3); background: var(--so-3b); border: 1px solid rgba(124,58,237,0.25); }
+.so-4 { color: var(--so-4); background: var(--so-4b); border: 1px solid rgba(5,150,105,0.25); }
+
+/* Leaflet popup override */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(13,27,62,0.2) !important;
+  border: 1px solid var(--border);
+}
+.leaflet-popup-content { margin: 0 !important; width: 220px !important; }
+.popup-wrap { font-family: 'DM Sans', sans-serif; }
+.popup-head {
+  background: var(--navy); padding: 10px 12px;
+}
+.popup-name { font-weight: 600; font-size: 13px; color: #fff; line-height: 1.3; }
+.popup-loc { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+.popup-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.popup-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--navy); }
+.popup-row svg { width: 12px; height: 12px; color: var(--muted); flex-shrink: 0; }
+.popup-row a { color: var(--navy-soft); font-weight: 500; text-decoration: none; }
+.popup-foot { padding: 0 12px 10px; display: flex; gap: 6px; }
+.leaflet-popup-tip-container { display: none; }
+
+/* Legend */
+.map-legend {
+  position: absolute; bottom: 24px; right: 12px; z-index: 500;
+  background: var(--surface); border-radius: 10px;
+  border: 1px solid var(--border); padding: 10px 12px;
+  box-shadow: 0 4px 16px rgba(13,27,62,0.12);
+}
+.legend-title { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.legend-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--navy); margin-bottom: 4px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; padding: 10px; }
+  .map-sidebar { width: calc(100% - 24px); max-height: 45%; top: auto; bottom: 12px; left: 12px; }
+  .map-legend { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-pill">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#0D1B3E"/>
+        <circle cx="12" cy="9" r="2.5" fill="#0D1B3E"/>
+      </svg>
+    </div>
+    <div class="brand">
+      <div class="brand-name">BPCL Locator</div>
+      <div class="brand-sub">Belgaum Territory</div>
+    </div>
+    <div class="hdr-count" id="hdr-count">350 outlets</div>
+    <div class="view-toggle">
+      <button class="view-btn active" id="btn-list" onclick="switchView('list')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        List
+      </button>
+      <button class="view-btn" id="btn-map" onclick="switchView('map')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        Map
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <div class="search-wrap">
+    <span class="search-icon">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </span>
+    <input type="search" id="q" placeholder="Search outlet name, location, district…" oninput="renderAll()">
+  </div>
+  <select class="flt" id="f-so" onchange="renderAll()">
+    <option value="">All SOs</option>
+  </select>
+  <select class="flt" id="f-district" onchange="renderAll()">
+    <option value="">All Districts</option>
+  </select>
+</div>
+
+<div class="results-row">
+  <span class="chip" id="chip-total">350 outlets</span>
+  <span class="results-count" id="results-count"></span>
+</div>
+
+<div class="app-body">
+  <!-- LIST VIEW -->
+  <div id="list-view">
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- MAP VIEW -->
+  <div id="map-view">
+    <div id="map"></div>
+    <div class="map-sidebar">
+      <div class="sidebar-head">
+        Outlets
+        <span id="sidebar-count">350</span>
+      </div>
+      <div class="sidebar-list" id="sidebar-list"></div>
+    </div>
+    <div class="map-legend" id="map-legend"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<script>
+const outletsData = [{"id": 1, "name": "Altrade Agencies", "location": "RO AT FORT ROAD BELGAUM,BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.85659, "lng": 74.51785, "contact": "9844053823"}, {"id": 2, "name": "Annu Service Station", "location": "RO AT MIRAJ CHIKODI ROAD ANKLI,BELG", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.5291, "lng": 74.66045, "contact": "8296579735"}, {"id": 3, "name": "Azad Petrol & Diesel Oil Dealers", "location": "RO AT ILKAL, NH-13,BAGALKOT", "district": "Ilkal", "so_name": "Spandan P", "lat": 15.98262, "lng": 76.10341, "contact": "9740401111"}, {"id": 4, "name": "B.L.Patil & Sons", "location": "RO AT P.B RD, HATTARGI, P.B RD,BELG", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.13369, "lng": 74.5168, "contact": "9448119835"}, {"id": 6, "name": "Hidkal Automobiles", "location": "RO AT HIDKAL, DAM SITE ROAD,BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.13897, "lng": 74.65115, "contact": "9902682732"}, {"id": 7, "name": "K.A.Mahajan", "location": "RO AT MIRAJ RD CHIKKODI,MIRAJ RD,BE", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.45979, "lng": 74.61021, "contact": "7795469190"}, {"id": 8, "name": "P.M.Karikazi", "location": "RO AT HEBBAL SANKESHWAR, NH-4,BELGA", "district": "Sankashwar", "so_name": "Vinit S", "lat": 16.22316, "lng": 74.51299, "contact": "9620765075"}, {"id": 9, "name": "R.B.Kitturkar", "location": "RO AT P.B ROAD SANKESHWAR, BELGAUM", "district": "Sankashwar", "so_name": "Vinit S", "lat": 16.25528, "lng": 74.48777, "contact": "9326874477"}, {"id": 10, "name": "S.V. Koujalgi & Sons", "location": "RO AT MAIN RD SAUNDATTI, MAIN RD,BE", "district": "Soundatti", "so_name": "Jaydip C", "lat": 15.7669, "lng": 75.11979, "contact": "9379772077"}, {"id": 11, "name": "Shree Laxmi Petrol Stores", "location": "RO AT MAIN ROAD GOKAK, MAIN ROAD,BE", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.16338, "lng": 74.81894, "contact": "9448638066"}, {"id": 12, "name": "Shri Mangesh Petrol Stores", "location": "RO AT BELGAUM, NR 3RD GATE,BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.82818, "lng": 74.50026, "contact": "9845726489"}, {"id": 13, "name": "S.S.Melligeri", "location": "RO AT MAIN ROAD BAGALKOT, BAGALKOT", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.18896, "lng": 75.70267, "contact": "9845400311"}, {"id": 14, "name": "S.S.Melligeri", "location": "RO AT G. CROSS. GADANKIRI, BAGALKOT", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.186, "lng": 75.61296, "contact": "9008899000"}, {"id": 15, "name": "Narayan Das Shamji", "location": "RO AT HALGA, P.B.ROAD, NH4,BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.83346, "lng": 74.54614, "contact": "9880219383"}, {"id": 16, "name": "A.G.Patwardhan & Sons", "location": "RO AT BUS STAND ROAD JAMKHANDI,BAGA", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.50841, "lng": 75.28408, "contact": "9448113262"}, {"id": 17, "name": "Ramdurga Auto Stores", "location": "RO AT POLICE STN. RD RAMDURG,BELGAU", "district": "Ramadurga", "so_name": "Jaydip C", "lat": 15.9454, "lng": 75.2946, "contact": "9880293031"}, {"id": 18, "name": "Sangameshwar Auto Services", "location": "RO AT SUREBAN, MAIN ROAD,BELGAUM", "district": "Kittur", "so_name": "Jaydip C", "lat": 15.88294, "lng": 75.39255, "contact": "9972390337"}, {"id": 19, "name": "B.V.Talathi & Brothers", "location": "RO AT MAHALINGPUR ROAD MUDHOL, BAGA", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.34051, "lng": 75.27661, "contact": "9133589000"}, {"id": 20, "name": "The Ugar Sugar Works Ltd.", "location": "RO AT MAIN ROAD UGARKHURD,BELGAUM", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.65912, "lng": 74.81924, "contact": "7795767821"}, {"id": 21, "name": "V.V.Varde", "location": "RO AT NH-4A, KHANAPUR,, NH4A,BELGAU", "district": "Khanapur", "so_name": "Jaydip C", "lat": 15.64111, "lng": 74.50446, "contact": "6363089397"}, {"id": 22, "name": "V.B.Sasnoor", "location": "RO AT STN RD BAGALKOT, MAIN RD,BAGA", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.18694, "lng": 75.70348, "contact": "9449376540"}, {"id": 23, "name": "V.J.Manjrekar & Son", "location": "RO AT CLUB ROAD BELGAUM, BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.86737, "lng": 74.51057, "contact": "9448126474"}, {"id": 24, "name": "T.M.Yerudkar", "location": "RO AT BUS STAND ROAD NIPPANI,BELGAU", "district": "Nippani", "so_name": "Vinit S", "lat": 16.39814, "lng": 74.38039, "contact": "9844101055"}, {"id": 25, "name": "Shri Guruprasad Filling Station", "location": "RO AT P.B.RD ITAGI CROSS, P.B.RD,BE", "district": "Belgaum", "so_name": "Jaydip C", "lat": 15.67853, "lng": 74.72637, "contact": "9686689115"}, {"id": 26, "name": "C.M. Benni", "location": "SAVANOOR", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 14.5749, "lng": 75.36882, "contact": "9538113699"}, {"id": 27, "name": "I.D.Bangarshetra & Sons", "location": "GADAG", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 15.422, "lng": 75.62242, "contact": "9448137624"}, {"id": 28, "name": "B.G.Doddamani & Brothers", "location": "DHARWAD", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.46415, "lng": 75.00008, "contact": "9916558182"}, {"id": 29, "name": "H.Obhan Automobiles", "location": "KOTGUNSHI", "district": "Kundgol", "so_name": "Saigiridhar K", "lat": 15.29726, "lng": 75.14674, "contact": "9448117716"}, {"id": 30, "name": "F.M.Hasbi", "location": "Nargund", "district": "Nargund", "so_name": "Saigiridhar K", "lat": 15.71627, "lng": 75.38437, "contact": "9739926699"}, {"id": 31, "name": "Jyothi Service Station", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.35099, "lng": 75.12237, "contact": "9513766655"}, {"id": 32, "name": "Kundgol T.A.P.C.M Society", "location": "KUNDGOL", "district": "Kundgol", "so_name": "Saigiridhar K", "lat": 15.25843, "lng": 75.23811, "contact": "9481014257"}, {"id": 33, "name": "T.A.Kuratti", "location": "NAWALGUND", "district": "Navalgund", "so_name": "Saigiridhar K", "lat": 15.55818, "lng": 75.36018, "contact": "8277036416"}, {"id": 34, "name": "Magavi City Fuels", "location": "HAVERI", "district": "Haveri", "so_name": "Vickey Kalindi", "lat": 14.78775, "lng": 75.40043, "contact": "9945367417"}, {"id": 35, "name": "Shree Basaweshwer Auto Services", "location": "MORAB", "district": "Navalgund", "so_name": "Saigiridhar K", "lat": 15.57996, "lng": 75.16152, "contact": "9449422172"}, {"id": 36, "name": "T.B.Manvi & Sons", "location": "LAXMESHWAR", "district": "Laxmeshwar", "so_name": "Vickey Kalindi", "lat": 15.12152, "lng": 75.47026, "contact": "9448443746"}, {"id": 37, "name": "S.M. Mirjankar & Co.", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.34961, "lng": 75.13739, "contact": "9886088088"}, {"id": 38, "name": "S.C. Naregal", "location": "DHARWAD", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.46192, "lng": 75.00568, "contact": "9448356467"}, {"id": 39, "name": "Parimala Enterprises", "location": "KUMARAPATNAM,", "district": "Ranebennur", "so_name": "Vickey Kalindi", "lat": 14.52639, "lng": 75.77927, "contact": "9538180244"}, {"id": 40, "name": "S.G.Patil & Co", "location": "SHIGGAON", "district": "Shiggaon", "so_name": "Vickey Kalindi", "lat": 14.99306, "lng": 75.21485, "contact": "9448115835"}, {"id": 41, "name": "G.L.Shetra", "location": " RANEBENNUR", "district": "Ranebennur ", "so_name": "Vickey Kalindi", "lat": 14.62096, "lng": 75.61907, "contact": "9845625752"}, {"id": 42, "name": "Western Garage", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.33454, "lng": 75.14242, "contact": "8088881099"}, {"id": 43, "name": "Renuka Petroleum", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.37447, "lng": 75.18379, "contact": "9008819596"}, {"id": 44, "name": "Bp-Kotur-1", "location": "KOTUR", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.52988, "lng": 74.9046, "contact": "9341196993"}, {"id": 45, "name": "Bp-Kotur-2", "location": "KOTUR", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.5285, "lng": 74.90502, "contact": "9880737901"}, {"id": 46, "name": "Mujawar Roadways", "location": "RO AT NEHRU NAGAR BELGAUM, BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.8812, "lng": 74.51682, "contact": "8312470786"}, {"id": 47, "name": "Barde Roadlines", "location": "RO AT BGM NH-4,KANGRALLI, BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.92066, "lng": 74.52551, "contact": "8312461266"}, {"id": 48, "name": "Ishwar Petroleum", "location": "GAJENDRAGAD", "district": "Gajendragad", "so_name": "Vickey Kalindi", "lat": 15.73077, "lng": 75.97533, "contact": "9448390190"}, {"id": 49, "name": "Shreya Agency", "location": "MUNDARGI", "district": "Mundargi", "so_name": "Vickey Kalindi", "lat": 15.19842, "lng": 75.8802, "contact": "9448477384"}, {"id": 50, "name": "Deven Agencies", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.35672, "lng": 75.13692, "contact": "9448453481"}, {"id": 51, "name": "Arawind Petroleum", "location": "RO AT KANBARGI ROAD, BELGAUM, BELGA", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.87164, "lng": 74.53271, "contact": "9916498492"}, {"id": 52, "name": "Deshpande Petroleum", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.36589, "lng": 75.14998, "contact": "9902179999"}, {"id": 53, "name": "Pujar Petroleums", "location": "GUTTAL", "district": "Haveri", "so_name": "Vickey Kalindi", "lat": 14.83592, "lng": 75.62297, "contact": "9880317697"}, {"id": 54, "name": "Shree Jagadguru Tontadarya Prasad N", "location": "GADAG", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 15.43222, "lng": 75.63577, "contact": "8147818225"}, {"id": 55, "name": "Sri. Veerabhadreshwar Petroleums", "location": "HIREKERUR", "district": "Hirekerur", "so_name": "Vickey Kalindi", "lat": 14.45626, "lng": 75.40634, "contact": "9538373835"}, {"id": 56, "name": "Netravathi Service Station", "location": "BYADAGI", "district": "Byadgi", "so_name": "Vickey Kalindi", "lat": 14.68765, "lng": 75.4903, "contact": "9448045326"}, {"id": 57, "name": "P.C.Kubihal & Bros.Fuelling Station", "location": "SHIGGAAON", "district": "Shiggon", "so_name": "Vickey Kalindi", "lat": 15.15248, "lng": 75.14202, "contact": "9448993572"}, {"id": 58, "name": "Shri Parishwanath Petroleums", "location": "RO AT TERDAL, KILLA BHAG, BAGALKOT", "district": "Terdal", "so_name": "Spandan P", "lat": 16.49314, "lng": 75.06539, "contact": "9480344797"}, {"id": 59, "name": "Shri Vigneshwar Traders", "location": "ADERGUNCHI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.28214, "lng": 75.1541, "contact": "9880847304"}, {"id": 60, "name": "Sri Basaveshwar Petroleums", "location": "RO AT HARUGERI CROSS, RAIBAG TK,BEL", "district": "Raibhag", "so_name": "Jaydip C", "lat": 16.52151, "lng": 74.95305, "contact": "8331257055"}, {"id": 61, "name": "Udapudi Petroleum", "location": "RO AT LOKAPUR, SH 65,BAGALKOT", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.18831, "lng": 75.35858, "contact": "9742654358"}, {"id": 62, "name": "Devendra Filling Station", "location": "RON", "district": "Ron", "so_name": "Saigiridhar K", "lat": 15.6932, "lng": 75.72665, "contact": "9448902969"}, {"id": 63, "name": "Rameshwar Petroleum", "location": "RO AT BHUTRAMATTI,NH-4, BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.97552, "lng": 74.50962, "contact": "9448691291"}, {"id": 64, "name": "Shri Lakshmi Petroleum", "location": "RO AT BIDI,BIDI,BELGAUM", "district": "Ramadurga", "so_name": "Jaydip C", "lat": 15.56957, "lng": 74.64498, "contact": "9980388147"}, {"id": 65, "name": "R.B.Kitturkar Petroleum", "location": "RO AT HONNIHALLI, BELGAUM TOWN,BELG", "district": "Sankashwar", "so_name": "Vinit S", "lat": 16.29724, "lng": 74.43512, "contact": "9448473423"}, {"id": 66, "name": "M.P.Karikazi", "location": "RO AT NAMAZ MAL, SANKESHWAR,BELGAUM", "district": "Sankashwar", "so_name": "Vinit S", "lat": 16.26102, "lng": 74.4787, "contact": "9449224507"}, {"id": 67, "name": "Gogte Petroleum", "location": "RO AT BELGAUM, NR GOAVES CIRCLE BEL", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.83728, "lng": 74.50744, "contact": "9844054361"}, {"id": 68, "name": "Rani Channamma Petroleum", "location": "RO AT KITTUR, SH 41,BELGAUM", "district": "Kittur", "so_name": "Jaydip C", "lat": 15.59676, "lng": 74.77791, "contact": "9880880342"}, {"id": 69, "name": "Laxmi Narasinha Agencies", "location": "RO AT ATHANI,ATHANI-KAGWAD RD,BELGA", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.73178, "lng": 75.04678, "contact": "9448157941"}, {"id": 70, "name": "Itnal Petroleum", "location": "RO AT THIMMAPUR, NR J.K.CEMNT,BAGAL", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.19366, "lng": 75.31476, "contact": "8431374628"}, {"id": 71, "name": "Jai Hanuman Petroleum", "location": "RO AT SAMBRA,MUTGA VILLAGE,BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.8684, "lng": 74.59771, "contact": "8762158810"}, {"id": 72, "name": "V. T. Fuel Station", "location": "SHELAWADI", "district": "Navalgund", "so_name": "Saigiridhar K", "lat": 15.5827, "lng": 75.47148, "contact": "9980995369"}, {"id": 73, "name": "Shivam Petroleum", "location": "GADAG", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 15.39398, "lng": 75.65166, "contact": "9538724444"}, {"id": 74, "name": "Sri Sai Petroleum", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.3579, "lng": 75.18749, "contact": "9448144277"}, {"id": 75, "name": "Bp-Ranebennur - I", "location": "RANEBENNUR", "district": "Ranebennur", "so_name": "Vickey Kalindi", "lat": 14.61981, "lng": 75.62436, "contact": "9448132585"}, {"id": 76, "name": "Sri Siddha Rudha Petroleum", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.33338, "lng": 75.12267, "contact": "9972100511"}, {"id": 77, "name": "National Petroleum", "location": "RO AT BAILHONGAL,DHARWAD ROAD,BELGA", "district": "Belgaum", "so_name": "Jaydip C", "lat": 15.80045, "lng": 74.86963, "contact": "9902008786"}, {"id": 78, "name": "S.B.Karadi Petroleum", "location": "RO AT AMINGAD,RAMATHAL VILLAGE,BAGA", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.0842, "lng": 75.90438, "contact": "9448130237"}, {"id": 79, "name": "Kiwad Petroleum", "location": "RO AT CHIKKODI,NR BASAVA CIRCLE,BEL", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.42495, "lng": 74.58525, "contact": "9448102108"}, {"id": 80, "name": "Ritesh Petroleum", "location": "RO AT RAIBAG,RAIBAG TALUK,BELGAUM", "district": "Raibhag", "so_name": "Jaydip C", "lat": 16.48803, "lng": 74.7833, "contact": "9448470177"}, {"id": 81, "name": "Shri Gurukaribasaveshwara F S", "location": "TUMINIKATTE", "district": "Ranibennur", "so_name": "Vickey Kalindi", "lat": 14.41701, "lng": 75.61984, "contact": "7090307071"}, {"id": 82, "name": "A.B. Parvatrao Petroleum", "location": "RO AT SANKESHWAR BYPASS,NH4,BELGAUM", "district": "Sankashwar", "so_name": "Vinit S", "lat": 16.25878, "lng": 74.46854, "contact": "9019318999"}, {"id": 83, "name": "Om Saikrishna Petroleum", "location": "RO AT BAUXITE RD. BELGAUM,BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.88732, "lng": 74.51571, "contact": "9449087699"}, {"id": 84, "name": "Bp-Kognolli", "location": "RO AT KOGNOLLI, NH-4, KOGNOLLI,BELG", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.54641, "lng": 74.31851, "contact": "9901522456"}, {"id": 85, "name": "Om Sai Ram Petroleum", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.38957, "lng": 75.10194, "contact": "9986286987"}, {"id": 86, "name": "The Gse&Ss Co-Op Society Ltd.", "location": "SATTUR", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.41827, "lng": 75.04438, "contact": "9380746496"}, {"id": 87, "name": "Kallur Petroleum", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.35521, "lng": 75.1278, "contact": "8362370710"}, {"id": 88, "name": "R.T.Patil Petroleum", "location": "RO AT YARAGATTI, BGM-BGKT ROAD,BELG", "district": "Ramadurga", "so_name": "Jaydip C", "lat": 15.96516, "lng": 75.01054, "contact": "9448134188"}, {"id": 89, "name": "Shri Deshpande Petroleum", "location": "RO AT GHATAPRABHA,SIRDHAN,BELGAUM", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.24339, "lng": 74.74024, "contact": "9448556528"}, {"id": 91, "name": "Goral Petroleum", "location": "RO AT DESUR ON NH-4, DESUR, BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.76947, "lng": 74.48875, "contact": "9980657211"}, {"id": 92, "name": "Kiran Auto", "location": "RO AT GOKAK,LOLASUR VILLAGE,BELGAUM", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.18174, "lng": 74.83127, "contact": "9620092531"}, {"id": 93, "name": "S.C.Panchakattimath Petroleum", "location": "RO AT RAMDURG,KILABANUR,BELGAUM", "district": "Ramadurga", "so_name": "Jaydip C", "lat": 15.94668, "lng": 75.3047, "contact": "9686997738"}, {"id": 94, "name": "Vanashree Petroleum", "location": "RO AT BADAMI, BANASHANKARI RD, BAGA", "district": "Bagalkot", "so_name": "Spandan P", "lat": 15.89391, "lng": 75.69963, "contact": "9448903066"}, {"id": 95, "name": "Shri Laxmi Petroleum", "location": "RO AT NAVANAGAR,SHIGIKERI, BAGALKOT", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.14526, "lng": 75.71101, "contact": "9742914375"}, {"id": 96, "name": "Aliya Petroleums", "location": "HUBLI TALUKA", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.30142, "lng": 75.07896, "contact": "8494950555"}, {"id": 97, "name": "Kartru Fakeereshwar Service Centre", "location": "SHIRAHATTI", "district": "Shirahatti", "so_name": "Vickey Kalindi", "lat": 15.23161, "lng": 75.56551, "contact": "9448873804"}, {"id": 98, "name": "Shahapur Petroleum", "location": "RO AT MANOLI, MANOLI VILLAGE,BELGAU", "district": "Kittur", "so_name": "Jaydip C", "lat": 15.85873, "lng": 75.11011, "contact": "9480158126"}, {"id": 99, "name": "Veerabhadreswar Petroleum Services", "location": "HAVERI", "district": "Haveri", "so_name": "Vickey Kalindi", "lat": 14.77687, "lng": 75.39785, "contact": "9886010317"}, {"id": 100, "name": "Jayalaxmi Petroleums", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.36008, "lng": 75.10974, "contact": "9986786888"}, {"id": 101, "name": "Shivgeet Petroleum", "location": "RO AT HUKKERI,SH45,BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.23812, "lng": 74.60346, "contact": "9739643444"}, {"id": 102, "name": "Annapurneshwari Petroleum", "location": "RO AT MANJARI,CHIKODI KAGWAD RD,BEL", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.5794, "lng": 74.69406, "contact": "8088999690"}, {"id": 103, "name": "Shree Devi Petroleum", "location": "RON", "district": "Ron", "so_name": "Saigiridhar K", "lat": 15.70213, "lng": 75.73558, "contact": "9845234765"}, {"id": 104, "name": "Shree Revanshiddeshwar Petroleums", "location": "Konnur", "district": "Nargund", "so_name": "Saigiridhar K", "lat": 15.85702, "lng": 75.48725, "contact": "7795834066"}, {"id": 105, "name": "Haladotar Petroleum", "location": "ANNIGERI", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.42668, "lng": 75.43891, "contact": "8861652489"}, {"id": 106, "name": "Shashank Petroleums", "location": "HULGUR", "district": "Shiggon", "so_name": "Vickey Kalindi", "lat": 15.07915, "lng": 75.28441, "contact": "9901629253"}, {"id": 107, "name": "Pallavi Petroleum", "location": "RO AT KOKATNUR,ATHANI ROAD,BELGAUM", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.70318, "lng": 75.17027, "contact": "7760133456"}, {"id": 108, "name": "Shree Renuka Devi Petroleum", "location": "RO AT KAUJALGI,SH54 KULOGOD RD, BEL", "district": "Sankashwar", "so_name": "Jaydip C", "lat": 16.20506, "lng": 75.05848, "contact": "9448859474"}, {"id": 109, "name": "Venkatesh Petroleum", "location": "RO AT NIDSOSHI,KAMATNUR CIRCLE,BELG", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.2581, "lng": 74.51607, "contact": "9448421076"}, {"id": 110, "name": "Muragesh Petroleum", "location": "RO AT LOKAPUR,BGT ROAD,SH-20, BAGAL", "district": "Mudalgi", "so_name": "Spandan P", "lat": 16.16406, "lng": 75.37779, "contact": "9449163231"}, {"id": 111, "name": "Shree Tulajabhavani Petroleum", "location": "HANGAL", "district": "Hangal", "so_name": "Vickey Kalindi", "lat": 14.75354, "lng": 75.122, "contact": "9482127092"}, {"id": 112, "name": "Ravganga Petroleum", "location": "RO AT CHINCHALI,KUDACHI ROAD,BELGAU", "district": "Raibhag", "so_name": "Jaydip C", "lat": 16.5684, "lng": 74.81821, "contact": "9886359977"}, {"id": 113, "name": "Mujawar Petroleum", "location": "RO AT AUTO NAGAR, BELGAUM,BELGAUM", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.89874, "lng": 74.54507, "contact": "9844099786"}, {"id": 114, "name": "Ilager Fuel Center", "location": "HANGAL", "district": "Hanagal", "so_name": "Vickey Kalindi", "lat": 14.7277, "lng": 75.16199, "contact": "9448552684"}, {"id": 115, "name": "Sri Veerabhadreshwar Petroleums", "location": "BANKAPUR TALUK, ", "district": "Shiggon", "so_name": "Vickey Kalindi", "lat": 14.92414, "lng": 75.25727, "contact": "9481287463"}, {"id": 116, "name": "Jabbar Petroleum", "location": "DHARWAD", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.49299, "lng": 74.97001, "contact": "9743404040"}, {"id": 117, "name": "Shri Sai Ram Petroleum", "location": "RO AT KANAGAON, GOKAK ROAD, BELGAUM", "district": "Nesargi", "so_name": "Jaydip C", "lat": 16.02469, "lng": 74.83035, "contact": "9740320972"}, {"id": 118, "name": "B S Kallur Petroleum", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.35868, "lng": 75.11666, "contact": "7411166777"}, {"id": 119, "name": "Sri Gurusiddaprabhudevaru Petroleum", "location": "DHARWAR", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.44922, "lng": 74.98771, "contact": "8904664513"}, {"id": 120, "name": "Shrinivas Petroleum", "location": "RO AT BILGI, BUS STD RD,BILGI, BAGA", "district": "Bilgi", "so_name": "Spandan P", "lat": 16.34117, "lng": 75.63334, "contact": "8970635345"}, {"id": 121, "name": "Hunashikatti Petroleum", "location": "HOMBAL", "district": "Hombal", "so_name": "Vickey Kalindi", "lat": 15.5179, "lng": 75.55783, "contact": "9164444927"}, {"id": 122, "name": "Shri Laxmi Venkateshwar Petroleum", "location": "NALAVADI,", "district": "Nalavadi,", "so_name": "Saigiridhar K", "lat": 15.36434, "lng": 75.3385, "contact": "9986661987"}, {"id": 123, "name": "Shree Siddhalingeshwara Petroleum", "location": "TIRLAPUR", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.55284, "lng": 75.24808, "contact": "9900195149"}, {"id": 124, "name": "Gunjikar Petroleums", "location": "ALNAVAR", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.44357, "lng": 74.74028, "contact": "9448115876"}, {"id": 125, "name": "Shri Mahant Petroleum", "location": "RO AT KASABA CHANDARGI, BELGAUM", "district": "Kittur", "so_name": "Jaydip C", "lat": 16.03616, "lng": 75.12654, "contact": "9972645555"}, {"id": 126, "name": "Shri Mayakkadevi Petroleum", "location": "RO AT RAIBAG,CHINCHALLI RD,BELGAUM", "district": "Raibhag", "so_name": "Jaydip C", "lat": 16.50403, "lng": 74.7812, "contact": "9945960542"}, {"id": 127, "name": "Shri Vinayak Petrol Pump", "location": "RO AT NESARGI, BELGAUM", "district": "Belgaum", "so_name": "Jaydip C", "lat": 15.90048, "lng": 74.77325, "contact": "9611631376"}, {"id": 128, "name": "Revanasiddeshwar Petroleum", "location": "RO AT GURLAPUR CROSS, BELGAUM", "district": "Mudalgi", "so_name": "Jaydip C", "lat": 16.36343, "lng": 74.94644, "contact": "9945415266"}, {"id": 129, "name": "Shri Hanuman Petroleum", "location": "RO AT HULIYAL, BAGALKOT", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.45898, "lng": 75.306, "contact": "9845625464"}, {"id": 130, "name": "Nimba City Petroleum", "location": "ALADAKATTI", "district": "Haveri", "so_name": "Vickey Kalindi", "lat": 12.80512, "lng": 74.85802, "contact": "9972264300"}, {"id": 131, "name": "Vaishnavi Petroleums", "location": "Hubli ,Opp-APMC", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.3936, "lng": 75.09093, "contact": "8050202586"}, {"id": 132, "name": "S. S. Kulkarni Petroleum", "location": "DHARWAD", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.46344, "lng": 74.97859, "contact": "9742499243"}, {"id": 133, "name": "Mstones", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.38045, "lng": 75.12757, "contact": "9448374342"}, {"id": 134, "name": "Shree Kanaka Petroleum", "location": "TANGOD", "district": "Tangod", "so_name": "Vickey Kalindi", "lat": 15.00336, "lng": 75.68909, "contact": "9448417799"}, {"id": 135, "name": "Adarsh Petroleum", "location": "LAKSHMESHWAR", "district": "Laxmeshwar", "so_name": "Vickey Kalindi", "lat": 15.12585, "lng": 75.46314, "contact": "9449897736"}, {"id": 136, "name": "Netravati Petroleum", "location": "RO AT MUGALKOD , BAGALKOT", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.3652, "lng": 75.20588, "contact": "9538637827"}, {"id": 137, "name": "Annapurneshwari Fuels", "location": "RO AT CHIKKODI ON BELGAUM ROAD", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.40618, "lng": 74.58414, "contact": "8970772188"}, {"id": 138, "name": "Shri Mahalingeshwar Petroleum", "location": "RO AT ALAGWADI,BELGAUM", "district": "Mudalgi", "so_name": "Jaydip C", "lat": 16.49257, "lng": 74.86549, "contact": "9448518100"}, {"id": 139, "name": "Shree Mallikarjun Trading Co.", "location": "MUNDARGI", "district": "Mundargi", "so_name": "Vickey Kalindi", "lat": 15.20922, "lng": 75.89008, "contact": "9448802244"}, {"id": 140, "name": "Sri Basaveshwar Petroleums", "location": "HAUNSABHAVI", "district": "Haunsabhavi", "so_name": "Vickey Kalindi", "lat": 14.57489, "lng": 75.36879, "contact": "9242216660"}, {"id": 141, "name": "Shri Malatesh Oil Traders", "location": "RATTIHALLI, HIREKERUR TALUK,", "district": "Hirekerur", "so_name": "Vickey Kalindi", "lat": 14.42306, "lng": 75.51166, "contact": "7259201856"}, {"id": 142, "name": "Huggi Petroleums", "location": "RANEBENNUR", "district": "Ranebennur", "so_name": "Vickey Kalindi", "lat": 14.60586, "lng": 75.62327, "contact": "9886430604"}, {"id": 143, "name": "Satya Ram Petroleum", "location": "RO AT KALLOLI, BELGAUM", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.25808, "lng": 74.8638, "contact": "8960277723"}, {"id": 144, "name": "Subhanallah Petroleum", "location": "RO AT YADWAD, BELGAUM", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.21472, "lng": 75.16985, "contact": "8971768827"}, {"id": 145, "name": "Shri Sai Petroleum", "location": "RO AT MUDHOL ON MANTUR RD, BAGALKOT", "district": "Mudhol", "so_name": "Spandan P", "lat": 16.34322, "lng": 75.29327, "contact": "7795311995"}, {"id": 146, "name": "Sri Veeresh Petroleum", "location": "RO AT BELWADI, DHARWAD RD,", "district": "Kittur", "so_name": "Jaydip C", "lat": 15.71405, "lng": 74.91727, "contact": "9901388070"}, {"id": 147, "name": "Smt. Gangamma S. Patil Memorial", "location": "BAGEWADI", "district": "Belgaum", "so_name": "Vickey Kalindi", "lat": 15.11478, "lng": 75.75922, "contact": "9740790080"}, {"id": 148, "name": "Pentagon Petroleum", "location": "BELUR", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.51198, "lng": 74.91848, "contact": "9845250015"}, {"id": 149, "name": "Al Mehboob Petroleum", "location": "RO AT MUDALGI,BELGAUM DIST", "district": "Mudalgi", "so_name": "Jaydip C", "lat": 16.33936, "lng": 74.94104, "contact": "9480639786"}, {"id": 150, "name": "Shri Mahalaxmi Petroleum", "location": "RO AT MAHALINGPUR ON CHIKODI ROAD", "district": "Mahalingpur", "so_name": "Spandan P", "lat": 16.38488, "lng": 75.1376, "contact": "9845399851"}, {"id": 151, "name": "Basava Jyoti Petroleum", "location": "RO AT PARISHWAD", "district": "Kittur", "so_name": "Jaydip C", "lat": 15.69822, "lng": 74.62129, "contact": "9449883411"}, {"id": 152, "name": "Brahmadev Petroleum", "location": "RO AT DARUR", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.63102, "lng": 75.01624, "contact": "9880159144"}, {"id": 153, "name": "Nerlikar Petroleum", "location": "RO AT KOTHALI", "district": "Khanapur", "so_name": "Vinit S", "lat": 16.41666, "lng": 74.526, "contact": "9448111396"}, {"id": 154, "name": "Tirth Petroleum", "location": "RO AT ATHANI (HARUGERI ROAD)", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.71533, "lng": 75.05764, "contact": "9611276161"}, {"id": 155, "name": "Desai Brothers", "location": "RO AT BELGAUM CITY -1(UDYAMBAG)", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.81863, "lng": 74.49392, "contact": "8867655445"}, {"id": 156, "name": "Naikar Petroleum", "location": "Shivalli", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.46419, "lng": 75.1457, "contact": "9620321748"}, {"id": 157, "name": "Rohit Petroleums", "location": "RO AT BELGAUM CITY (VENGURLA ROAD)", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.87581, "lng": 74.46123, "contact": "9964181971"}, {"id": 158, "name": "V B S", "location": "RO AT NAVANAGAR TOWN", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.1585, "lng": 75.66982, "contact": "8762292999"}, {"id": 159, "name": "M P Urabhinavar Petroleums", "location": "RO AT RABKAVI", "district": "Rabakavi", "so_name": "Spandan P", "lat": 16.46643, "lng": 75.10738, "contact": "8050381149"}, {"id": 160, "name": "Sharadambika Petroleums", "location": "RO AT HIREBAGEWADI TO CHIKBAGEWADI", "district": "Kittur", "so_name": "Jaydip C", "lat": 15.77044, "lng": 74.68276, "contact": "7026178989"}, {"id": 161, "name": "Shanmukh Petroleum", "location": "MUGAD", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.44235, "lng": 74.88713, "contact": "9448416230"}, {"id": 162, "name": "Shri Maltesh Petroleums", "location": "NEGALUR,", "district": "Byadgi", "so_name": "Vickey Kalindi", "lat": 14.88423, "lng": 75.6002, "contact": "9901063489"}, {"id": 163, "name": "Shree Laxmi Petroleum", "location": "RO AT KANPET", "district": "Soundatti", "so_name": "Jaydip C", "lat": 15.94217, "lng": 75.20193, "contact": "9448142278"}, {"id": 164, "name": "Shree Nidhi Petroleum", "location": "TADKOD", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.60328, "lng": 74.90244, "contact": "9448631332"}, {"id": 165, "name": "Shivakashi & Sons Petroleum", "location": "RO AT JAMKHANDI TOWN", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.51013, "lng": 75.2938, "contact": "9916156712"}, {"id": 166, "name": "Keerti Petroleums", "location": "ALAGWADI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.62975, "lng": 75.29361, "contact": "9964940494"}, {"id": 167, "name": "Basavashree Petroleum", "location": "HIREBENDIGERI,", "district": "Shiggon", "so_name": "Vickey Kalindi", "lat": 15.0835, "lng": 75.21651, "contact": "9448394879"}, {"id": 168, "name": "P. V. Petroleums", "location": "Nargund", "district": "Nargund", "so_name": "Saigiridhar K", "lat": 15.7388, "lng": 75.40608, "contact": "9620086547"}, {"id": 169, "name": "Nikhil Petroleums", "location": "HAVANUR", "district": "Haveri", "so_name": "Vickey Kalindi", "lat": 14.85854, "lng": 75.67702, "contact": "9880820659"}, {"id": 170, "name": "Desai Petroleums", "location": "HALAGERI,", "district": "Ranibennur", "so_name": "Vickey Kalindi", "lat": 14.56277, "lng": 75.61212, "contact": "9886794231"}, {"id": 171, "name": "Shri Guddada Odeya Petroleums", "location": "NEAR GUTTAL ROAD, DEVARGUDDA", "district": "Haveri", "so_name": "Vickey Kalindi", "lat": 14.68754, "lng": 75.61921, "contact": "9481449797"}, {"id": 172, "name": "Shree Kalmeshwar Petroleums", "location": "RO AT HARUGERI", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.54317, "lng": 74.96613, "contact": "8105206724"}, {"id": 173, "name": "Daneswari Petroleum", "location": "RO AT BENKATTI", "district": "Soundatti", "so_name": "Jaydip C", "lat": 15.90589, "lng": 75.07149, "contact": "8867197903"}, {"id": 174, "name": "Bhavani Petroleum", "location": "RO AT NAGARMANOLI", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.37657, "lng": 74.66509, "contact": "9886444936"}, {"id": 175, "name": "Shideshwar Petroleums", "location": "RO AT MADBHAVI", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.79884, "lng": 74.96164, "contact": "9611706820"}, {"id": 176, "name": "Sangmeshwar Petroleums", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.33765, "lng": 75.11166, "contact": "9886664140"}, {"id": 177, "name": "Rahul Petroleums", "location": "RO AT KABBUR CROSS", "district": "Nippani", "so_name": "Jaydip C", "lat": 16.34631, "lng": 74.73667, "contact": "7483542351"}, {"id": 178, "name": "Basavashree Petroleum", "location": "RO AT MUGALKHOD", "district": "Raibhag", "so_name": "Jaydip C", "lat": 16.44369, "lng": 74.96331, "contact": "9535165047"}, {"id": 179, "name": "Jayam Petroleum", "location": "Hubli exit befor kundgol cross on LHS on NH-4", "district": "Kundgol", "so_name": "Saigiridhar K", "lat": 15.29753, "lng": 75.14664, "contact": "9964178486"}, {"id": 180, "name": "Pawar Petroleum", "location": "MALAPUR", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.47365, "lng": 75.01957, "contact": "9964388924"}, {"id": 181, "name": "Tushar Petroleums", "location": "RO AT SATTIGERI CROSS TO KORKOPPA C", "district": "Soundatti", "so_name": "Jaydip C", "lat": 16.02452, "lng": 75.0913, "contact": "9019006858"}, {"id": 182, "name": "Neelamma Petroleums", "location": "RO AT TIGADI", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.25409, "lng": 74.97308, "contact": "9886040101"}, {"id": 183, "name": "Annapoorneswari Fuels", "location": "TUMMINAKATTE RANEBENNUR", "district": "Ranibennur", "so_name": "Vickey Kalindi", "lat": 14.41245, "lng": 75.62329, "contact": "9380132566"}, {"id": 184, "name": "Mruthyunjaya Petroleums", "location": "SAVANUR POST, HAVERI ", "district": "Savanur", "so_name": "Vickey Kalindi", "lat": 14.97552, "lng": 75.33219, "contact": "7892174890"}, {"id": 185, "name": "Sri Maltesh Petroleum", "location": "HAVERI", "district": "Haveri", "so_name": "Vickey Kalindi", "lat": 14.79031, "lng": 74.11939, "contact": "9481465548"}, {"id": 186, "name": "Shree Hari Om Petroleums", "location": "RO AT KULGERI CROSS ON STATE HIGHWA", "district": "Bagalkot", "so_name": "Spandan P", "lat": 15.9089, "lng": 75.50756, "contact": "9342227800"}, {"id": 187, "name": "Hiremath Petrol Bunk", "location": "GUTTAL VILLAGE, ", "district": "Haveri", "so_name": "Vickey Kalindi", "lat": 14.77686, "lng": 75.39785, "contact": "9742723546"}, {"id": 188, "name": "Shri Amareshwar Petroleum", "location": "GAJENDRAGAD", "district": "Gajendragad", "so_name": "Vickey Kalindi", "lat": 15.73736, "lng": 75.94905, "contact": "8050319461"}, {"id": 189, "name": "Durgalaxmi Petroleum", "location": "Kundgol on SH", "district": "Kundgol", "so_name": "Saigiridhar K", "lat": 15.26093, "lng": 75.22986, "contact": "9916877082"}, {"id": 190, "name": "Om Petroleum", "location": "RO AT JAMBOTI", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.69517, "lng": 74.37062, "contact": "8892702476"}, {"id": 191, "name": "More Petroleums", "location": "RO AT TELSANG", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.78456, "lng": 75.33576, "contact": "9591889428"}, {"id": 192, "name": "Shrinivas Petroleum", "location": "RO AT HULKUND", "district": "Belgaum", "so_name": "Jaydip C", "lat": 15.86562, "lng": 74.52085, "contact": "9448029606"}, {"id": 193, "name": "Butali Petroleum", "location": "RO AT ATHANI TOWN", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.72719, "lng": 75.07588, "contact": "8050731931"}, {"id": 194, "name": "S D Atawalagi", "location": "KULENUR VILLAGE, HAVERI TALUK", "district": "Haveri", "so_name": "Vickey Kalindi", "lat": 14.73088, "lng": 75.2829, "contact": "9448341713"}, {"id": 195, "name": "Sai Petroleum", "location": "RO AT BELGAUM CITY EXIT - SAMBRA RO", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.85817, "lng": 74.56372, "contact": "9901257575"}, {"id": 196, "name": "Kiran Petroleum", "location": "RO AT CHIKKOPPA VILLAGE", "district": "Soundatti", "so_name": "Jaydip C", "lat": 15.82934, "lng": 75.0027, "contact": "9900178436"}, {"id": 197, "name": "Basaveshwar Petroleum", "location": "MULGUND", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 15.28526, "lng": 75.53151, "contact": "9449511891"}, {"id": 198, "name": "Bolannavar Petroleums", "location": "RO AT BAILHONGAL TOWN", "district": "Belgaum", "so_name": "Jaydip C", "lat": 15.82105, "lng": 74.85027, "contact": "9008881097"}, {"id": 199, "name": "Venkateshwar Petroleums", "location": "RO AT BADAGANDI VILLAGE", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.34233, "lng": 75.64552, "contact": "9731581006"}, {"id": 200, "name": "Bp Ranebennur Ii", "location": " RANEBENNUR", "district": "Ranebennur", "so_name": "Vickey Kalindi", "lat": 14.64859, "lng": 75.59753, "contact": "8073140823"}, {"id": 201, "name": "Vijayalaxmi Petroleums", "location": "RO AT MAMADAPUR  CROSS", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.11186, "lng": 74.90375, "contact": "9620132697"}, {"id": 202, "name": "Noor Petroleum", "location": "CHIKKERUR VILLAGE", "district": "Hirekerur", "so_name": "Vickey Kalindi", "lat": 14.52488, "lng": 75.30332, "contact": "9880701483"}, {"id": 203, "name": "Padmamba Petroleum", "location": "RO AT SALAHALLI ON YERAGATTI-LOKAPU", "district": "Yaragatti", "so_name": "Jaydip C", "lat": 16.08223, "lng": 75.23888, "contact": "9449141259"}, {"id": 204, "name": "R P Gulmi Petroleum", "location": "BANKAPUR VILLAGE, SHIGGAON", "district": "Shiggon", "so_name": "Vickey Kalindi", "lat": 14.66103, "lng": 75.43447, "contact": "8792337779"}, {"id": 205, "name": "Shri Mahalaxmi Petroleums", "location": "RO AT HANCHINAL ON NH-4", "district": "Soundatti", "so_name": "Vinit S", "lat": 16.15236, "lng": 74.51803, "contact": "9164082212"}, {"id": 206, "name": "Ranveer Petroleums", "location": "RO AT SUTGATTI NH-4", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.05406, "lng": 74.51283, "contact": "9448859695"}, {"id": 207, "name": "Shri Daneshwari Petroleum", "location": "RO AT MACHHE", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.78481, "lng": 74.48326, "contact": "9481747383"}, {"id": 208, "name": "Shaurya Petroleum", "location": "RO AT NANDGAON", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.68062, "lng": 75.12856, "contact": "9449323456"}, {"id": 209, "name": "Avadhut Petroleum", "location": "RO AT NIPANI, LEFT HAND SIDE ON NH4", "district": "Nippani", "so_name": "Vinit S", "lat": 16.39697, "lng": 74.3729, "contact": "9945766629"}, {"id": 210, "name": "Saanvi Petroleums", "location": "KURTAKOTI", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 15.37919, "lng": 75.52833, "contact": "9902539860"}, {"id": 211, "name": "Vijayalaxmi Petroleum", "location": "RO AT JAMKHANDI-BIJAPUR ROAD", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.51391, "lng": 75.30362, "contact": "8880444351"}, {"id": 212, "name": "Shrimahalaxmi Petroleum", "location": "DHARWAD ", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.41486, "lng": 75.00068, "contact": "9886102588"}, {"id": 213, "name": "Nyamagoudar Petroleums", "location": "RO AT WITHIN MUNICIPAL LIMITS OF MU", "district": "Mudhol", "so_name": "Spandan P", "lat": 16.35347, "lng": 75.31405, "contact": "7738120183"}, {"id": 214, "name": "Smt Susheelamma.S.Patil Memorial", "location": "GADAG", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 15.0964, "lng": 75.87791, "contact": "9740475103"}, {"id": 215, "name": "Jannu Petroleum", "location": "OLD PB ROAD UMASHANKAR NAGAR, RANEBENNUR", "district": "Ranibennur", "so_name": "Vickey Kalindi", "lat": 14.60908, "lng": 75.6413, "contact": "9902179999"}, {"id": 216, "name": "Shivabasav Petroleums", "location": "RO AT GOKAK CITY FALLS ROAD", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.16483, "lng": 74.80917, "contact": "7019058997"}, {"id": 217, "name": "Atharv Petroleums", "location": "hubli", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.34912, "lng": 75.10946, "contact": "9448235819"}, {"id": 218, "name": "Advik Petroleum", "location": "RO AT  PATTANKUDI,NIPANI-CHIKOD ROA", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.40208, "lng": 74.43023, "contact": "9448662154"}, {"id": 219, "name": "Guttannavar Petroleums", "location": "RO AT JANGAWAD VILLAGE", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.04796, "lng": 75.42712, "contact": "7483214449"}, {"id": 220, "name": "Attar Petroleum", "location": "RO AT HUKKERI,HUKKERI TALUKA", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.23068, "lng": 74.60562, "contact": "9964316930"}, {"id": 221, "name": "Kaveri Petroleum", "location": "RO AT PACHHAPUR", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.09741, "lng": 74.69258, "contact": "7795263708"}, {"id": 222, "name": "Shri Laxminarayan Petroleum", "location": "RO AT GUDUR ON BADAMI HIGHWAY", "district": "Bagalkot", "so_name": "Spandan P", "lat": 15.93688, "lng": 75.91068, "contact": "9448231187"}, {"id": 223, "name": "Dixit Agencies", "location": "dharwad", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.41865, "lng": 75.43325, "contact": "9986780337"}, {"id": 224, "name": "Pooja Petroleum", "location": "RO AT SATTI ON HIPPARAGI ATHANI ROA", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.58173, "lng": 75.08186, "contact": "7760133456"}, {"id": 225, "name": "Mahalaxmi Petroleum", "location": "RO AT ATHANI-JAMKHANDI ROAD", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.7151, "lng": 75.06843, "contact": "9108435555"}, {"id": 226, "name": "Shri Somnath Petroleum", "location": "RO AT WITHIN 5KM OF KANGRALI KHURD", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.90513, "lng": 74.49475, "contact": "8951051713"}, {"id": 227, "name": "Shri Anjaneya Smart Fuels", "location": "Ranebennur", "district": "Ranebennur", "so_name": "Vickey Kalindi", "lat": 14.62217, "lng": 75.65821, "contact": "7259743561"}, {"id": 228, "name": "Bhaveshwari Petroliums", "location": "RO AT WITHIN 2KM OF DADDI VILLAGE", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.07903, "lng": 74.45462, "contact": "9945828377"}, {"id": 229, "name": "V R Ambale Petroleum", "location": "RO AT PEERANWADI JUNCTION", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.80604, "lng": 74.48594, "contact": "9343341050"}, {"id": 230, "name": "Shri Vinayak Petroleums", "location": "Gadag City,", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 15.42284, "lng": 75.61376, "contact": "9060306989"}, {"id": 231, "name": "Shri Venkateshwara Petroleum", "location": "RAMDURG TO BADAMI ROAD AT HALGATTI", "district": "Ramadurga", "so_name": "Jaydip C", "lat": 15.95278, "lng": 75.32556, "contact": "9448368217"}, {"id": 232, "name": "Patil Petroleum", "location": "RO AT MANTUR CROSS TO KALADAGI CROS", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.32439, "lng": 75.47756, "contact": "9742350026"}, {"id": 233, "name": "Barki Petroleum", "location": "Byadgi", "district": "Byadgi", "so_name": "Vickey Kalindi", "lat": 14.68195, "lng": 75.47842, "contact": "9620789027"}, {"id": 234, "name": "J G Petroleums", "location": "Mundargi", "district": "Mundargi", "so_name": "Vickey Kalindi", "lat": 15.35275, "lng": 75.70214, "contact": "9448309642"}, {"id": 235, "name": "Appaji Petroleums", "location": "RO AT HUNGUND TOWARDS ILKAL ROAD", "district": "Hungund", "so_name": "Spandan P", "lat": 16.03082, "lng": 76.03474, "contact": "9620077692"}, {"id": 236, "name": "Nyamagoudar Petroleum", "location": "RO AT JKD BJP ROAD, KUMBARHAL", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.54489, "lng": 75.33632, "contact": "8970132135"}, {"id": 237, "name": "Nisarga Priya Pump", "location": "RO AT SORAGAON CROSS", "district": "Mudhol", "so_name": "Spandan P", "lat": 16.35287, "lng": 75.2365, "contact": "9448688882"}, {"id": 238, "name": "Advik Sonakshi Fuels", "location": "RO AT  RAMPUR (BALOBA CROSS)", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.43666, "lng": 74.41758, "contact": "6362864006"}, {"id": 239, "name": "Naroote Petroleum", "location": "RO AT IN AND AROUND 5 KM OF SAVALGI", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.64463, "lng": 75.38056, "contact": "9429631758"}, {"id": 240, "name": "Sonakshi Petroleum", "location": "RO AT WITHIN 1 KM OF NANDI SUGAR", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.50457, "lng": 74.62476, "contact": "7795082405"}, {"id": 241, "name": "Saroja Petroleums", "location": "MUNDARGI ", "district": "Mundargi", "so_name": "Vickey Kalindi", "lat": 15.23005, "lng": 75.86812, "contact": "8884713333"}, {"id": 242, "name": "Tulajabhavani Petroleum", "location": "RO AT TERDAL TOWN ON KUDACHI ROAD", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.49001, "lng": 75.04937, "contact": "7892484361"}, {"id": 243, "name": "Suvarana Petroleum", "location": "RO AT SULEBHAVI ON SH-133", "district": "Hungund", "so_name": "Spandan P", "lat": 16.03813, "lng": 75.93652, "contact": "9902624392"}, {"id": 244, "name": "Guru Petroleums", "location": "RO AT KITTUR CITY LIMITS", "district": "Kittur", "so_name": "Jaydip C", "lat": 15.60333, "lng": 74.78864, "contact": "9731999340"}, {"id": 245, "name": "Shri Jagannath Petroleum", "location": "RO AT KALKHAMB ON SH-54 BELGAUM TAL", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.8973, "lng": 74.57416, "contact": "9620135298"}, {"id": 246, "name": "Asha Bharati Petro Links", "location": "RO AT AIGALI CROSS ON ATHANI TIKOTA", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.74124, "lng": 75.2368, "contact": "9480017889"}, {"id": 247, "name": "Pavanaja Petroleum", "location": "KULENUR SANGUR ", "district": "Haveri", "so_name": "Vickey Kalindi", "lat": 14.7766, "lng": 75.30228, "contact": "9448631176"}, {"id": 248, "name": "Vijay Petroleums", "location": "KORLAHALLI", "district": "Mundargi", "so_name": "Vickey Kalindi", "lat": 15.12235, "lng": 75.89239, "contact": "8105252389"}, {"id": 249, "name": "Roopali Service Center", "location": "RO AT SHAHAPUR BELGAUM CITY", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.84948, "lng": 74.52188, "contact": "9448077255"}, {"id": 250, "name": "Sri Basava Filling Station", "location": "MUNDARGI TQ,", "district": "Mundargi", "so_name": "Vickey Kalindi", "lat": 15.03007, "lng": 75.79618, "contact": "9620570216"}, {"id": 251, "name": "Nyamagoudar Petroleums Kunchanur", "location": "RO AT KUNCHANOOR VILLAGE", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.52411, "lng": 75.36623, "contact": "9900134046"}, {"id": 252, "name": "Shri Channagireshwar Petroliums", "location": "RO AT MAHALINGPUR WITHIN CITY LIMIT", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.38082, "lng": 75.11235, "contact": "9880060562"}, {"id": 253, "name": "Shri Guru Sangameshwar Petroleums", "location": "RO AT IN AND AROUND 8 KMS OF BANHAT", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.49537, "lng": 75.19034, "contact": "9538852663"}, {"id": 254, "name": "Karudi Smart Fuels", "location": "SHIGGAON TALUKA", "district": "Shiggon", "so_name": "Vickey Kalindi", "lat": 14.88468, "lng": 75.15519, "contact": "9448109857"}, {"id": 255, "name": "Mallikarjun Petrol Pump", "location": "HANGAL TALUKA", "district": "Hanagal", "so_name": "Vickey Kalindi", "lat": 14.8764, "lng": 75.22861, "contact": "9663992027"}, {"id": 256, "name": "Sai Baba Petroleum", "location": "RO AT BAILHONGAL TO BELGAUM ROAD", "district": "Belgaum", "so_name": "Jaydip C", "lat": 15.80749, "lng": 74.84762, "contact": "9901074447"}, {"id": 257, "name": "Shri Arihant Petroleum", "location": "RO AT  PATTANKUDI VILLAGE CHIKODI", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.40361, "lng": 74.45044, "contact": "9480152799"}, {"id": 258, "name": "Shrishti Petroleums", "location": "RO AT UCHGAON VILLAGE", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.89088, "lng": 74.42439, "contact": "9535312377"}, {"id": 259, "name": "Sai Petroleum", "location": "RO AT MANGASULI VILLAGE", "district": "Khagwad", "so_name": "Spandan P", "lat": 16.73351, "lng": 74.84235, "contact": "9689792200"}, {"id": 260, "name": "Balaji Petroleum", "location": "RO AT ULLAGADDI KHANAPURE", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.17187, "lng": 74.52188, "contact": "9019318999"}, {"id": 261, "name": "Shri Mallikarjun Petroleum", "location": "RO AT WITHIN CITY LIMITS OF JAMKHAN", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.51982, "lng": 75.27546, "contact": "7411789102"}, {"id": 262, "name": "Shri Adavisiddeshwar Petroleum", "location": "RO AT MARIGUDDI VILLAGE", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.4279, "lng": 75.33389, "contact": "9322904097"}, {"id": 263, "name": "Raj Petroleum", "location": "RO AT BORAGAON VILLAGE", "district": "Nippani", "so_name": "Vinit S", "lat": 16.62034, "lng": 74.49724, "contact": "9822597735"}, {"id": 264, "name": "Siddhaswaroop Fuel Point", "location": "RO AT MAMADAPUR VILAGE", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.47129, "lng": 74.43336, "contact": "7829107074"}, {"id": 265, "name": "Shri Mahalaxmi Petroleums- 1", "location": "KALGHATGI TALUK", "district": "Kalaghatagi", "so_name": "Saigiridhar K", "lat": 15.20259, "lng": 74.99446, "contact": "9740091127"}, {"id": 266, "name": "Goutam Petroleum", "location": "RO AT VIDYAGIRI", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.18063, "lng": 75.64204, "contact": "9342212276"}, {"id": 267, "name": "Ganga Ganesh Filling Station", "location": "MEDLERI VILLAGE", "district": "Byadgi", "so_name": "Vickey Kalindi", "lat": 14.66825, "lng": 75.73018, "contact": "9663991200"}, {"id": 268, "name": "Shree Sai Petrols", "location": "Betgeri town, Gadag ", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 15.43962, "lng": 75.65617, "contact": "9886803831"}, {"id": 269, "name": "Shri Aranya Siddeshwar Petroleum", "location": "RO AT UDAGATTI VILLAGE", "district": "Jamakandi", "so_name": "Jaydip C", "lat": 16.19467, "lng": 74.94197, "contact": "9008597600"}, {"id": 270, "name": "Vimaleshwara Petrol Pump", "location": "RATTIHALLI TALUKA", "district": "Rattihalli", "so_name": "Vickey Kalindi", "lat": 14.36903, "lng": 75.45281, "contact": "9449341373"}, {"id": 271, "name": "Uppin Master Petroleum", "location": "HANAGAL TALUKA", "district": "Hanagal", "so_name": "Vickey Kalindi", "lat": 14.79334, "lng": 75.14508, "contact": "9448232713"}, {"id": 272, "name": "Kumbar Petroleum", "location": "RO AT  WITHIN 3KM OF JAINAPUR VILLA", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.38199, "lng": 74.55783, "contact": "8618278946"}, {"id": 273, "name": "Shree Basaveshwar Petroleum", "location": "RO AT TULASIGERI CROSS TO BHANTANUR", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.19717, "lng": 75.50385, "contact": "9740885215"}, {"id": 274, "name": "Golashetti Petroleum", "location": "RO AT MANTUR ON SH-55", "district": "Mudhol", "so_name": "Spandan P", "lat": 16.38368, "lng": 75.3793, "contact": "9449520101"}, {"id": 275, "name": "Veeralingayyanamath And Company", "location": "GADAG CITY", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 15.40476, "lng": 75.61279, "contact": "9448358628"}, {"id": 276, "name": "Shree Sai Petroleum", "location": "RO AT BATAKURKI VILLAGE LIMITS", "district": "Raibhag", "so_name": "Jaydip C", "lat": 16.06259, "lng": 75.36406, "contact": "9880353230"}, {"id": 277, "name": "S.S.Melligeri", "location": "RO AT RTO CIRCLE TO HUBLI CROSS", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.16885, "lng": 75.65254, "contact": "9449120685"}, {"id": 278, "name": "Bp-Keshawapur", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.36727, "lng": 75.16802, "contact": "9447489983"}, {"id": 279, "name": "Srinivasa Petroleum", "location": "DHARWAD", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.40642, "lng": 75.06645, "contact": "9886046712"}, {"id": 280, "name": "Shri Basav Petroleums", "location": "RO AT TUNGAL CROSS", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.69236, "lng": 75.27035, "contact": "9686169419"}, {"id": 281, "name": "Yashodhara Petroleums", "location": "DHARWAD TALUKA", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.47804, "lng": 75.12432, "contact": "9739945667"}, {"id": 282, "name": "Shri Duradundeshwar Petroleum", "location": "RO AT ARABHAVI VILLAGE", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.20259, "lng": 74.82688, "contact": "9611291263"}, {"id": 283, "name": "Aashirwad Fuels", "location": "RO AT AKHOL", "district": "Nippani", "so_name": "Vinit S", "lat": 16.45792, "lng": 74.41659, "contact": "9164575578"}, {"id": 284, "name": "Shivashakti Petroleum", "location": "HAVERI", "district": "Haveri", "so_name": "Vickey Kalindi", "lat": 14.81361, "lng": 75.38192, "contact": "9448103733"}, {"id": 285, "name": "Sri Jagajyoti Basaveshwar Petroleum", "location": "KUNDGOL TALUKA, ", "district": "Kundgol", "so_name": "Saigiridhar K", "lat": 15.12897, "lng": 75.35848, "contact": "9448082524"}, {"id": 286, "name": "Shree Mahalaxmi Petroleum", "location": "RO AT SHINDHIHATTI VILLAGE", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.14573, "lng": 74.66258, "contact": "8762108179"}, {"id": 287, "name": "Shri Patil & Son'S Petroleum", "location": "RO AT ATHANI TOWN", "district": "Belgaum", "so_name": "Spandan P", "lat": 16.71798, "lng": 75.02457, "contact": "7259239383"}, {"id": 288, "name": "Baarakhuda Petroleum", "location": "RO AT NAGNUR NEAR JAMKHANDI SUGARS", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.57494, "lng": 75.39809, "contact": "9036270131"}, {"id": 289, "name": "Rashtrakuta Petroleums", "location": "RO AT HOOLAKATTI VILLAGE LIMITS", "district": "Soundatti", "so_name": "Jaydip C", "lat": 15.82074, "lng": 75.22419, "contact": "9986803723"}, {"id": 290, "name": "Kwality Fuels", "location": "RO AT GULEDGUDDA VILLAGE LIMITS", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.04703, "lng": 75.7755, "contact": "9880295106"}, {"id": 291, "name": "Shri Kamagiri Petroleum", "location": "GAJENDRAGHAD", "district": "Gajendraghad", "so_name": "Vickey Kalindi", "lat": 15.81631, "lng": 75.82136, "contact": "9611518462"}, {"id": 292, "name": "Shiva Service Station", "location": "RO AT DANDAPUR CROSS", "district": "Belgaum", "so_name": "Jaydip C", "lat": 16.28183, "lng": 74.80448, "contact": "9019295556"}, {"id": 293, "name": "Shree Siddhi Vinayaka Petroleum", "location": "RO AT HANCHINAL ON KOGNOLLI ADI ROA", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.5333, "lng": 74.3517, "contact": "9900866789"}, {"id": 294, "name": "Shri Mahalingeshwar Petroleums", "location": "RO AT MAHALINGPUR ON KULGOD ROAD", "district": "Mahalingpur", "so_name": "Spandan P", "lat": 16.37701, "lng": 75.10902, "contact": "9632467756"}, {"id": 295, "name": "Neeralagi Petroleum", "location": "ANNIGERI TALUKA", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.57389, "lng": 75.4759, "contact": "9980211303"}, {"id": 296, "name": "Samarth Fuelpoint", "location": "RO AT GADENKERI CROSS TO KERUR ON N", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.10823, "lng": 75.5898, "contact": "9916504585"}, {"id": 297, "name": "Sharif Petroleum", "location": "RO AT MUDALGI TOWN", "district": "Mudalgi", "so_name": "Jaydip C", "lat": 16.34479, "lng": 74.96621, "contact": "9901919086"}, {"id": 298, "name": "Ilager Petroleum", "location": "HANGAL TALUKA", "district": "Hangal Taluka", "so_name": "Vickey Kalindi", "lat": 14.72092, "lng": 75.13717, "contact": "9448961592"}, {"id": 299, "name": "Shri Heramb Petroleum", "location": "RO AT WITHIN 2 KM OF NANDIHALLI VIL", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.72873, "lng": 74.56023, "contact": "9731576583"}, {"id": 300, "name": "Bhagyalaxmi Petroleum", "location": "RO AT BORAGAONWADI", "district": "Nippani", "so_name": "Vinit S", "lat": 16.59177, "lng": 74.49013, "contact": "9902091596"}, {"id": 301, "name": "Shri Mahalingeshwar Petroleums", "location": "RO AT BELGAUM TO M K HUBLI ON NH48", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.80579, "lng": 74.57534, "contact": "9448518100"}, {"id": 302, "name": "Renukadevi Petroleums", "location": "SHIRAHATTI TALUKA", "district": "Shirahatti", "so_name": "Vickey Kalindi", "lat": 15.0799, "lng": 75.6463, "contact": "9886982918"}, {"id": 303, "name": "Jannu Petroleum", "location": "HIREKERUR TOWN, \nHIREKERUR TALUKA,\n", "district": "Hirekerur", "so_name": "Vickey Kalindi", "lat": 14.45499, "lng": 75.37993, "contact": "9986034105"}, {"id": 304, "name": "Namakkal Ganesh Fuels", "location": "HUBLI TALUKA", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.16738, "lng": 75.14075, "contact": "9790688699"}, {"id": 305, "name": "J P Patil Petroleum", "location": "RO AT WITHIN 1 KM OF BARAGAON CROSS", "district": "Kittur", "so_name": "Jaydip C", "lat": 15.65393, "lng": 74.5317, "contact": "9964166762"}, {"id": 306, "name": "Paarvati Petroleum", "location": "RO AT EXAMBE VILLAGE", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.55581, "lng": 74.61081, "contact": "8867547021"}, {"id": 307, "name": "Sakshi Petroleums", "location": "RO AT WITHIN 2KM OF BELAGAVI INTERN", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.89021, "lng": 74.55465, "contact": "9343121676"}, {"id": 308, "name": "Annadani Petroleums", "location": "NAREGAL VILLAGE, GAJENDRAGHAD TALUKA,", "district": "Gajendraghad", "so_name": "Vickey Kalindi", "lat": 15.57604, "lng": 75.8079, "contact": "9448361142"}, {"id": 309, "name": "Ideal Petroleum", "location": "RO AT NANDGAD VILLAGE LIMITS", "district": "Kittur", "so_name": "Jaydip C", "lat": 15.58654, "lng": 74.5685, "contact": "9448349085"}, {"id": 310, "name": "Siddappa Hipparagi (Mrn) Petroleums", "location": "RO AT HIPPARAGI ,JAMKHANDI -ATHANI", "district": "Jamkandi", "so_name": "Spandan P", "lat": 16.54597, "lng": 75.18651, "contact": "9741970168"}, {"id": 311, "name": "Tongali Petroleum", "location": "HUBLI TALUKA", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.32524, "lng": 75.12732, "contact": "9945706500"}, {"id": 312, "name": "Bp-Belgaum", "location": "COCO MANAGUTTI NH4", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.09813, "lng": 74.51832, "contact": "7506931431"}, {"id": 313, "name": "Shri Siddheshwar Petroleum", "location": "RO AT BEDKIHAL", "district": "Nippani", "so_name": "Vinit S", "lat": 16.53968, "lng": 74.48746, "contact": "9019122525"}, {"id": 314, "name": "Avalakki Petroleums", "location": "RO AT BELGAUM CITY,VADGAON TO RTO C", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.83807, "lng": 74.52778, "contact": "9449441425"}, {"id": 315, "name": "S.K.Rathod Petroleum", "location": "RO AT WITHIN 3 KM OF SHIPPUR VILLAG", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.34593, "lng": 74.38605, "contact": "9555555694"}, {"id": 316, "name": "Desai Petroleum", "location": "RO AT ALATAGE VILLAGE BELGAUM TALUK", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.90538, "lng": 74.49496, "contact": "8792659144"}, {"id": 317, "name": "Joshi Petroleums", "location": "RO AT HATTARGI TOLLPLAZA TO DADABAN", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.1191, "lng": 74.5178, "contact": "9448349271"}, {"id": 318, "name": "Adarsh Petroleums", "location": "RO AT BAVANSOUNDATTI TO BHIRADI", "district": "Raibhag", "so_name": "Jaydip C", "lat": 16.5522, "lng": 74.70605, "contact": "9686219399"}, {"id": 319, "name": "Pendari Petroleum", "location": "RO AT MAHALINGPUR ON CHIKODI ROAD", "district": "Mahalingpur", "so_name": "Spandan P", "lat": 16.38706, "lng": 75.09742, "contact": "9972356661"}, {"id": 320, "name": "Sai Fuels", "location": "RO AT WITHIN 5 KM FROM NAGARAHALLA", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.26519, "lng": 75.94433, "contact": "9538434402"}, {"id": 321, "name": "Hubballi Fuels", "location": "Hubli", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.32788, "lng": 75.11828, "contact": "8710923668"}, {"id": 322, "name": "Suryakiran Petroleums", "location": "RO AT NIPANI TOWN WITHIN 3KM OF KSR", "district": "Nippani", "so_name": "Vinit S", "lat": 16.41221, "lng": 74.37591, "contact": "7406036226"}, {"id": 323, "name": "Doodhganga Petroleum", "location": "RO AT SADLGA VILLAGE CHIKODI TALUKA", "district": "Belgaum", "so_name": "Vinit S", "lat": 16.55385, "lng": 74.52722, "contact": "9448191500"}, {"id": 324, "name": "Nyamagoudar Petroleums", "location": "RO AT DALMIA CROSS", "district": "Madalgi", "so_name": "Jaydip C", "lat": 16.23463, "lng": 75.18276, "contact": "9611355511"}, {"id": 325, "name": "Sevalal Petroliums", "location": "GADAG TALUKA", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 15.33365, "lng": 75.62266, "contact": "9847465468"}, {"id": 326, "name": "M G Hindalgekar Petroleum", "location": "RO AT BETWEEN SULGA TO P B ROAD", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.87819, "lng": 74.47356, "contact": "7795029152"}, {"id": 327, "name": "Shri Parmanand Petroleum", "location": "RO AT CHIKKALAKI CROSS", "district": "Bagalkot", "so_name": "Spandan P", "lat": 16.60417, "lng": 75.46073, "contact": "9880612220"}, {"id": 328, "name": "Bp-Belgaum City", "location": "COCO BELGAUM CITY", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.84632, "lng": 74.52169, "contact": "9538466656"}, {"id": 329, "name": "Shri Brahmanath Petroleum", "location": "RO AT SHEDBAL TO KAGWAD ATHANI TALU", "district": "Kagwad", "so_name": "Spandan P", "lat": 16.69221, "lng": 74.72705, "contact": "9986056510"}, {"id": 330, "name": "Shree Kalasammadevi Petroliems", "location": "RO AT GOVANKOPPA VILLAGE", "district": "Bagalkot", "so_name": "Spandan P", "lat": 15.8833, "lng": 75.49724, "contact": "9845293720"}, {"id": 331, "name": "Raddi Petroleum", "location": "HUBLI", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.36326, "lng": 75.30172, "contact": "9663385830"}, {"id": 332, "name": "Mahati Petroleums", "location": "RO AT M. K HUBLI VILLAGE WITHIN 2 K", "district": "Kittur", "so_name": "Jaydip C", "lat": 15.71909, "lng": 74.69136, "contact": "8105621470"}, {"id": 333, "name": "S.S.B Petroleum'S", "location": "MUNDARGI TALUK", "district": "Mundargi", "so_name": "Vickey Kalindi", "lat": 15.29716, "lng": 75.77568, "contact": "9008193996"}, {"id": 334, "name": "Mahalasa Filling Station", "location": "RO AT ZADSHAHAPUR VILLAGE", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.76139, "lng": 74.48935, "contact": "9740716701"}, {"id": 335, "name": "Anjaneya Fuels", "location": "Tehariyal", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.35902, "lng": 75.04365, "contact": "7846057777"}, {"id": 336, "name": "Shri Siddalinga Shivayogi Petroleum", "location": "RO AT KADROLLI TO KITTUR ROAD ON RH", "district": "Kittur", "so_name": "Jaydip C", "lat": 15.65325, "lng": 74.73999, "contact": "9901265452"}, {"id": 337, "name": "Parvati Petroleums", "location": "Mishrikoti", "district": "Hubli", "so_name": "Saigiridhar K", "lat": 15.26242, "lng": 75.05586, "contact": "8123876362"}, {"id": 338, "name": "Mahalaxmi Fuel Park", "location": "KALGHATGI TALUK", "district": "Kalaghatagi", "so_name": "Saigiridhar K", "lat": 15.18357, "lng": 74.97481, "contact": "8431913868"}, {"id": 339, "name": "Girijabasava Petroleum", "location": "Mushigeri", "district": "Mushigeri", "so_name": "Vickey Kalindi", "lat": 15.79772, "lng": 75.85957, "contact": "9945667486"}, {"id": 340, "name": "Siddivinayak Petroleum", "location": "RO AT SANGOLLI VILLAGE LIMITS", "district": "Belgaum", "so_name": "Jaydip C", "lat": 15.72436, "lng": 74.83351, "contact": "9945298651"}, {"id": 341, "name": "Shree Sai Petroleum'S", "location": "RO AT WITHIN 2-3 KMS OF YELLAMMA TE", "district": "Soundatti", "so_name": "Jaydip C", "lat": 15.74492, "lng": 75.17724, "contact": "8197672725"}, {"id": 342, "name": "Sri Sai Fuel Station", "location": "Shyadambi", "district": "Haveri", "so_name": "Vickey Kalindi", "lat": 15.0532, "lng": 75.16835, "contact": "9738485871"}, {"id": 343, "name": "R.H.Petroleum", "location": "Gadag to Mulgund Road", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 15.33622, "lng": 75.57042, "contact": "9980398222"}, {"id": 344, "name": "Shri Mahalaxmi Petroleum Adhoc", "location": "RO AT MUDHOL, LOKAPUR ROAD,BAGALKOT", "district": "Mudhol", "so_name": "Spandan P", "lat": 16.31734, "lng": 75.29678, "contact": "8073912206"}, {"id": 345, "name": "Belgaum Sugars Private Limited", "location": "RO AT WITHIN 1 KM OF TUMARGUDDI VIL", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.96677, "lng": 74.66976, "contact": "9844911193"}, {"id": 346, "name": "Patil Petrol Pump", "location": "RO AT BELGAUMCITY 8KM OF PRAKASH TA", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.83527, "lng": 74.51925, "contact": "9448160901"}, {"id": 347, "name": "Shree Bhavani Renuka Petroleum", "location": "Pale Village", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.24102, "lng": 75.14261, "contact": ""}, {"id": 348, "name": "Jeevankanti Petroleum", "location": "Kusugal", "district": "Dharawad", "so_name": "Saigiridhar K", "lat": 15.39728, "lng": 75.21105, "contact": ""}, {"id": 349, "name": "Devaashish Petroleums", "location": "RO AT NIPANI BUS STAND TO BASAVESHW", "district": "Nippani", "so_name": "Vinit S", "lat": 16.40441, "lng": 74.38833, "contact": ""}, {"id": 350, "name": "Shri Dhaneshwari Petroleum", "location": "Hulikoti, Gadag", "district": "Gadag", "so_name": "Vickey Kalindi", "lat": 15.40714, "lng": 75.60289, "contact": ""}, {"id": 380, "name": "Shri Mahalingeshwar Petroleums", "location": "RO AT KAKATI TO SUVARNA VIDHAN SOUD", "district": "Belgaum", "so_name": "Vinit S", "lat": 15.80707, "lng": 74.57072, "contact": "9035439895"}, {"id": 381, "name": "Shree Basaveshwar Petroleum Ad", "location": "RO AT RABKAVI RD, MAHALINGPUR, BAGA", "district": "Rabakavi", "so_name": "Spandan P", "lat": 16.39413, "lng": 75.1086, "contact": "9880060562"}];
+</script>
+<script>
+// ── SO metadata ──
+const SO_META = {
+  'Vinit S':       { idx: 0, color: '#4F46E5', label: 'Vinit S' },
+  'Jaydip C':      { idx: 1, color: '#0E7490', label: 'Jaydip C' },
+  'Spandan P':     { idx: 2, color: '#D97706', label: 'Spandan P' },
+  'Vickey Kalindi':{ idx: 3, color: '#7C3AED', label: 'Vickey Kalindi' },
+  'Saigiridhar K': { idx: 4, color: '#059669', label: 'Saigiridhar K' },
+};
+
+function soClass(so) {
+  const m = SO_META[so.trim()];
+  return m ? `so-${m.idx}` : 'so-0';
+}
+function soColor(so) {
+  const m = SO_META[so.trim()];
+  return m ? m.color : '#4F46E5';
+}
+
+function initials(name) {
+  return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+function mapsUrl(o) {
+  return `https://maps.google.com/?q=${o.lat},${o.lng}`;
+}
+
+// ── Populate filters ──
+const ALL = outletsData;
+const sos = [...new Set(ALL.map(o=>o.so_name.trim()))].sort();
+const dists = [...new Set(ALL.map(o=>o.district.trim()))].sort();
+
+const soSel = document.getElementById('f-so');
+sos.forEach(s => { const op = document.createElement('option'); op.value = s; op.textContent = s; soSel.appendChild(op); });
+
+const distSel = document.getElementById('f-district');
+dists.forEach(d => { const op = document.createElement('option'); op.value = d; op.textContent = d; distSel.appendChild(op); });
+
+// ── Filter ──
+let filtered = [...ALL];
+
+function getFiltered() {
+  const q = document.getElementById('q').value.toLowerCase().trim();
+  const so = document.getElementById('f-so').value;
+  const dist = document.getElementById('f-district').value;
+  return ALL.filter(o => {
+    const mq = !q || o.name.toLowerCase().includes(q) || o.location.toLowerCase().includes(q) || o.district.toLowerCase().includes(q);
+    const ms = !so || o.so_name.trim() === so;
+    const md = !dist || o.district.trim() === dist;
+    return mq && ms && md;
+  });
+}
+
+// ── List render ──
+function renderList(data) {
+  const grid = document.getElementById('grid');
+  if (!data.length) {
+    grid.innerHTML = `<div class="empty"><div class="empty-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D1B3E" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><h3>No outlets found</h3><p>Try adjusting your filters</p></div>`;
+    return;
+  }
+  grid.innerHTML = data.map(o => `
+    <div class="card" id="c-${o.id}">
+      <div class="card-head">
+        <div class="avatar">${initials(o.name)}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="c-name">${o.name}</div>
+          <div class="c-loc">${o.district.trim()}</div>
+          <span class="so-badge ${soClass(o.so_name)}">${o.so_name.trim()}</span>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="card-body">
+        <div class="info-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span style="color:var(--muted);font-size:11px;">${o.location}</span>
+        </div>
+        ${o.contact ? `
+        <div class="info-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.64 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.55 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45"/></svg>
+          <a href="tel:${o.contact}">${o.contact}</a>
+        </div>` : ''}
+      </div>
+      <div class="card-foot">
+        <a class="btn btn-gold" href="${mapsUrl(o)}" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Maps
+        </a>
+        ${o.contact ? `<a class="btn btn-outline" href="tel:${o.contact}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.64 12"/></svg>
+          Call
+        </a>` : ''}
+        <button class="btn btn-outline" onclick="switchView('map');flyTo(${o.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+          Map
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── MAP ──
+let map, markersLayer, activeMarker = null;
+const markerCache = {};
+
+function createMarkerIcon(so, size=10) {
+  const c = soColor(so);
+  const s = size;
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:${s}px;height:${s}px;border-radius:50%;background:${c};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>`,
+    iconSize: [s, s],
+    iconAnchor: [s/2, s/2],
+    popupAnchor: [0, -(s/2+4)]
+  });
+}
+
+function createActiveIcon(so) {
+  const c = soColor(so);
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:16px;height:16px;border-radius:50%;background:${c};border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);transform:scale(1.3);"></div>`,
+    iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -12]
+  });
+}
+
+function popupHTML(o) {
+  return `
+    <div class="popup-wrap">
+      <div class="popup-head">
+        <div class="popup-name">${o.name}</div>
+        <div class="popup-loc">${o.district.trim()}</div>
+      </div>
+      <div class="popup-body">
+        <div class="popup-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          SO: ${o.so_name.trim()}
+        </div>
+        <div class="popup-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span style="font-size:11px;color:#6B7280;">${o.location}</span>
+        </div>
+        ${o.contact ? `<div class="popup-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.64 12"/></svg>
+          <a href="tel:${o.contact}">${o.contact}</a>
+        </div>` : ''}
+      </div>
+      <div class="popup-foot">
+        <a class="btn btn-gold" style="height:28px;font-size:11px;" href="${mapsUrl(o)}" target="_blank" rel="noopener">Open in Maps</a>
+      </div>
+    </div>`;
+}
+
+function initMap() {
+  if (map) return;
+  map = L.map('map', { zoomControl: false }).setView([15.85, 75.0], 9);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+  }).addTo(map);
+  markersLayer = L.layerGroup().addTo(map);
+  buildLegend();
+}
+
+function buildLegend() {
+  const lg = document.getElementById('map-legend');
+  lg.innerHTML = '<div class="legend-title">Sales Officer</div>' +
+    Object.entries(SO_META).map(([name,m]) =>
+      `<div class="legend-row"><div class="legend-dot" style="background:${m.color};"></div>${name}</div>`
+    ).join('');
+}
+
+function renderMap(data) {
+  if (!map) return;
+  markersLayer.clearLayers();
+  Object.keys(markerCache).forEach(k => delete markerCache[k]);
+
+  data.forEach(o => {
+    const mk = L.marker([o.lat, o.lng], { icon: createMarkerIcon(o.so_name) });
+    mk.bindPopup(popupHTML(o), { maxWidth: 240, minWidth: 220, autoPan: true });
+    mk.on('click', () => {
+      highlightSidebar(o.id);
+      if (activeMarker && activeMarker._bpclId !== o.id) {
+        const prev = data.find(x=>x.id===activeMarker._bpclId);
+        if (prev) activeMarker.setIcon(createMarkerIcon(prev.so_name));
+      }
+      mk.setIcon(createActiveIcon(o.so_name));
+      activeMarker = mk; activeMarker._bpclId = o.id;
+    });
+    markerCache[o.id] = mk;
+    markersLayer.addLayer(mk);
+  });
+
+  renderSidebar(data);
+}
+
+function renderSidebar(data) {
+  const list = document.getElementById('sidebar-list');
+  document.getElementById('sidebar-count').textContent = data.length;
+  list.innerHTML = data.map(o => `
+    <div class="s-item" id="si-${o.id}" onclick="flyTo(${o.id})">
+      <div class="s-dot" style="background:${soColor(o.so_name)};"></div>
+      <div>
+        <div class="s-name">${o.name}</div>
+        <div class="s-sub">${o.district.trim()} · ${o.so_name.trim()}</div>
+      </div>
+    </div>`).join('');
+}
+
+function flyTo(id) {
+  const o = ALL.find(x=>x.id===id);
+  if (!o || !map) return;
+  switchView('map');
+
+  if (activeMarker && activeMarker._bpclId !== id) {
+    const prev = filtered.find(x=>x.id===activeMarker._bpclId);
+    if (prev) activeMarker.setIcon(createMarkerIcon(prev.so_name));
+  }
+  const mk = markerCache[id];
+  if (mk) {
+    map.flyTo([o.lat, o.lng], 14, { duration: 1.2 });
+    setTimeout(() => { mk.openPopup(); mk.setIcon(createActiveIcon(o.so_name)); activeMarker = mk; activeMarker._bpclId = id; }, 1300);
+  }
+  highlightSidebar(id);
+}
+
+function highlightSidebar(id) {
+  document.querySelectorAll('.s-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById(`si-${id}`);
+  if (el) { el.classList.add('active'); el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+}
+
+// ── View switching ──
+let mapInit = false;
+function switchView(v) {
+  const lv = document.getElementById('list-view');
+  const mv = document.getElementById('map-view');
+  const bl = document.getElementById('btn-list');
+  const bm = document.getElementById('btn-map');
+  if (v === 'map') {
+    lv.style.display = 'none'; mv.style.display = 'flex';
+    bl.classList.remove('active'); bm.classList.add('active');
+    if (!mapInit) { initMap(); mapInit = true; }
+    renderMap(filtered);
+  } else {
+    mv.style.display = 'none'; lv.style.display = 'block';
+    bm.classList.remove('active'); bl.classList.add('active');
+  }
+}
+
+// ── Main render ──
+function renderAll() {
+  filtered = getFiltered();
+  const n = filtered.length;
+  document.getElementById('hdr-count').textContent = `${n} outlets`;
+  document.getElementById('chip-total').textContent = `${n} outlets`;
+  document.getElementById('results-count').textContent = n < ALL.length ? `Filtered from ${ALL.length}` : '';
+
+  const isMap = document.getElementById('map-view').style.display === 'flex';
+  if (isMap) renderMap(filtered);
+  else renderList(filtered);
+}
+
+// ── Init ──
+renderAll();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
