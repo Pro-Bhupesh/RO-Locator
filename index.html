@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BPCL Outlet Locator – Belgaum Territory</title>
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkJQQ0wgT3V0bGV0IExvY2F0b3IiLAogICJzaG9ydF9uYW1lIjogIkJQQ0wgTG9jYXRvciIsCiAgImRlc2NyaXB0aW9uIjogIkZpbmQgQlBDTCBPdXRsZXRzIGFuZCBjb250YWN0cyBxdWlja2x5LiBCZWxnYXVtIFRlcnJpdG9yeS4iLAogICJzdGFydF91cmwiOiAiLi9pbmRleC5odG1sIiwKICAic2NvcGUiOiAiLi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdC1wcmltYXJ5IiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMEQxQjNFIiwKICAidGhlbWVfY29sb3IiOiAiI0ZDQ0IwNiIsCiAgImNhdGVnb3JpZXMiOiBbCiAgICAidXRpbGl0aWVzIiwKICAgICJuYXZpZ2F0aW9uIgogIF0sCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImljb24tMTkyLnBuZyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJpY29uLTUxMi5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0KICBdLAogICJzaG9ydGN1dHMiOiBbCiAgICB7CiAgICAgICJuYW1lIjogIlNlYXJjaCBPdXRsZXRzIiwKICAgICAgInNob3J0X25hbWUiOiAiU2VhcmNoIiwKICAgICAgInVybCI6ICIuL2luZGV4Lmh0bWwiLAogICAgICAiaWNvbnMiOiBbCiAgICAgICAgewogICAgICAgICAgInNyYyI6ICJpY29uLTE5Mi5wbmciLAogICAgICAgICAgInNpemVzIjogIjE5MngxOTIiCiAgICAgICAgfQogICAgICBdCiAgICB9LAogICAgewogICAgICAibmFtZSI6ICJNYXAgVmlldyIsCiAgICAgICJzaG9ydF9uYW1lIjogIk1hcCIsCiAgICAgICJ1cmwiOiAiLi9pbmRleC5odG1sIiwKICAgICAgImljb25zIjogWwogICAgICAgIHsKICAgICAgICAgICJzcmMiOiAiaWNvbi0xOTIucG5nIiwKICAgICAgICAgICJzaXplcyI6ICIxOTJ4MTkyIgogICAgICAgIH0KICAgICAgXQogICAgfQogIF0KfQ==">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BPCL Locator">
+<meta name="application-name" content="BPCL Locator">
+<meta name="theme-color" content="#FCCB06">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
@@ -594,8 +600,16 @@ function renderAll() {
 // ── Init ──
 renderAll();
 
+
+</script>
+
+<script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js', { scope: './' })
+      .then(reg => console.log('[BPCL SW] Registered:', reg.scope))
+      .catch(e => console.warn('[BPCL SW] Failed:', e));
+  });
 }
 </script>
 </body>
